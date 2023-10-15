@@ -1,8 +1,9 @@
 {
-  "name": "webp2gif",
+  "name": "webp-conv",
   "version": "1.0.0",
   "description": "A simple converter for animated WebP to GIF.",
   "main": "index.js",
+  "license": "MIT",
   "author": "caed0",
   "dependencies": {
     "canvas": "^2.11.2",
