@@ -1,0 +1,6 @@
+examples
+node_modules
+.idea
+.gitignore
+.npmignore
+package-lock.json
