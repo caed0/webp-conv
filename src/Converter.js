@@ -6,22 +6,27 @@ const { PNG } = require('pngjs');
 const { loadImage, createCanvas } = require('canvas');
 
 class Converter {
-  async convert(input, output, options = {}) {
+  async convert(input, output = '.', options = {}) {
     const { quality = 10, transparent = '0x000000' } = options;
 
     if(!fs.existsSync(input)) throw new Error("Input file does not exist");
-    if(!fs.existsSync(path.dirname(output))) throw new Error("Output folder does not exist");
+    if(!fs.existsSync(output)) throw new Error("Output folder does not exist");
 
     const img = new Image();
     await img.load(input);
-    if(!img.hasAnim) return console.log(`skipping ${input} because it is not an animated`);
-    await img.initLib();
 
+    let outputPath = path.join(output, path.basename(input, path.extname(input)) + (img.hasAnim ? '.gif' : '.png'));
+    if(outputPath.endsWith('.png')) {
+      fs.copyFileSync(input, outputPath);
+      return outputPath;
+    }
+
+    await img.initLib();
     const { width, height, data } = img;
     const frames = data.anim.frames;
 
     const encoder = new GIFEncoder(width, height);
-    encoder.createReadStream().pipe(fs.createWriteStream(output));
+    encoder.createReadStream().pipe(fs.createWriteStream(outputPath));
     encoder.start();
     encoder.setRepeat(data.anim.loops);
     encoder.setTransparent(transparent);
@@ -50,6 +55,7 @@ class Converter {
     }
 
     encoder.finish();
+    return outputPath;
   }
 }
 
