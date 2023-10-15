@@ -34,7 +34,7 @@ The `convert` method takes the following parameters:
 - `outputFolder`: The folder where the converted file will be saved.
 - `options` (optional): An object containing additional options for the conversion.
     - `quality`: The quality of the output image (0-100). Higher values result in better quality, but larger file sizes. (`Default: 10`)
-    - `transparent`: A string specifying the transparency color in hexadecimal format (e.g., '0xRRGGBB' or '0xRRGGBBAA'). This option is only applicable to PNG format conversions. (`Default: 0x000000`)
+    - `transparent`: A string specifying the transparency color in hexadecimal format (e.g., '0xRRGGBB' or '0xRRGGBBAA'). This option is only applicable to conversions with transperent background. (`Default: 0x000000`)
 
 ## License
 
