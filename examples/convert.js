@@ -14,4 +14,4 @@ inputFiles.forEach(input => {
     });
 });
 
-// This will convert all animated/static WebP inputs to GIF/PNG format and output the files in examples/images folder.
+// This will convert all animated/static WebP files in exaples/images to GIF/PNG format and output the files in examples/images folder.
