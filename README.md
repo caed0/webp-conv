@@ -4,7 +4,7 @@ webp-conv is a Node.js module for converting both animated and static WebP files
 
 ## Installation
 
-You can install webpconv using npm:
+You can install webp-conv using npm:
 
 ```bash
 npm install webp-conv
