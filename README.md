@@ -15,7 +15,7 @@ npm install @caed0/webp-conv
 Here's a simple example of how to use webp-conv in your Node.js project:
 
 ```javascript
-const webpconv = require('webpconv');
+const webpconv = require('@caed0/webp-conv');
 const converter = new webpconv();
 
 const input = 'example.webp';
