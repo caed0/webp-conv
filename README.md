@@ -1,6 +1,6 @@
 # webp-conv - WebP to GIF/PNG Converter
 
-webp-conv is a Node.js module for converting both animated and static WebP files to GIF or PNG format. With this tool, you can easily convert your WebP images, making it a convenient solution for your image conversion needs.
+webp-conv is a Node.js module for converting both animated and static WebP files to GIF or PNG format. This tool leverages the powerful libwebp library to provide high-quality conversions. With this tool, you can easily convert your WebP images, making it a convenient solution for your image conversion needs.
 
 ## Installation
 
@@ -36,10 +36,16 @@ The `convert` method takes the following parameters:
     - `quality`: The quality of the output image (0-100). Higher values result in better quality, but larger file sizes. (`Default: 10`)
     - `transparent`: A string specifying the transparency color in hexadecimal format (e.g., '0xRRGGBB' or '0xRRGGBBAA'). This option is only applicable to conversions with transperent background. (`Default: 0x000000`)
 
+## Dependencies
+
+This module relies on the [libwebp](https://developers.google.com/speed/webp) library for WebP image processing. Precompiled binaries of libwebp are automatically downloaded during installation.
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](https://en.wikipedia.org/wiki/MIT_License) file for details.
 
+The libwebp library is licensed under a separate license. For more information, please refer to the [libwebp license](https://github.com/webmproject/libwebp/blob/main/COPYING).
+
 ## Issues and Contributions
 
-If you encounter any issues or have suggestions for improvements, please feel free to create an issue on the [GitHub repository](https://github.com/caed0/webp-conv). Contributions in the form of pull requests are also welcome.
+If you encounter any issues or have suggestions for improvements, please feel free to create an issue on the [GitHub repository](https://github.com/caed0/webp-conv/issues). Contributions in the form of pull requests are also welcome.
