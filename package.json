@@ -3,9 +3,6 @@
   "version": "2.0.3",
   "description": "A simple converter for animated WebP to GIF.",
   "main": "index.js",
-  "scripts": {
-    "postinstall": "node install.js"
-  },
   "license": "MIT",
   "author": "caed0",
   "dependencies": {
