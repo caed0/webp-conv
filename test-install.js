@@ -2,12 +2,12 @@
  * @file test-install.js
  *
  * @description
- * This script verifies the installation of the cwebp binary. It performs the following tasks:
- *   - Determines the binary name based on the operating system (cwebp.exe for Windows, cwebp for others).
+ * This script verifies the installation of the anim_dump binary. It performs the following tasks:
+ *   - Determines the binary name based on the operating system (anim_dump.exe for Windows, anim_dump for others).
  *   - Constructs the expected path to the binary located under the "libwebp/bin" directory.
  *   - Checks if the binary exists at the computed path.
- *   - Executes the binary with the "--version" flag and captures its output.
- *   - Logs a success message and the version if the execution is successful.
+ *   - Executes the binary with the "-version" flag and captures its output.
+ *   - Logs a success message if the execution is successful.
  *   - Logs an error message and exits the process with a non-zero code if the binary is missing or the execution fails.
  *
  * @requires fs - For file system operations.
@@ -26,7 +26,7 @@ const path = require("path");
 const { execSync } = require("child_process");
 
 // Determine the binary name based on the operating system
-const binaryName = os.platform() === "win32" ? "cwebp.exe" : "cwebp";
+const binaryName = os.platform() === "win32" ? "anim_dump.exe" : "anim_dump";
 const binaryPath = path.join(__dirname, "libwebp", "bin", binaryName);
 
 if (!fs.existsSync(binaryPath)) {
