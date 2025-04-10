@@ -6,29 +6,39 @@ const GIFEncoder = require('gif-encoder-2');
 const { loadImage, createCanvas } = require('canvas');
 const os = require("os");
 
+const execFileAsync = (file, args) => {
+  return new Promise((resolve, reject) => {
+    execFile(file, args, (error) => {
+      if (error) reject(error);
+      else resolve();
+    });
+  });
+};
+
+const waitForFrames = async (folder, expectedCount) => {
+  while (fs.readdirSync(folder).length !== expectedCount) {
+    await new Promise(resolve => setTimeout(resolve, 50));
+  }
+};
+
 class Converter {
   #BINARIES = path.join(path.resolve(__dirname, '..'), 'libwebp', 'bin');
   #ANIM_DUMP = path.join(this.#BINARIES, 'anim_dump');
   #DWEBP = path.join(this.#BINARIES, 'dwebp');
 
   async convert(input, output, options = {}) {
-    if(!input) throw new Error("Input is required");
-    if(!output) throw new Error("Output is required");
-    if(!fs.existsSync(input)) throw new Error(`Input file does not exist (${__dirname + input})`);
-    if(!fs.statSync(input).isFile()) throw new Error("Input is not a file");
-    if(path.extname(input) !== '.webp') throw new Error("Input file is not a webp file");
-    if(path.extname(output) !== '.gif' && path.extname(output) !== '.png') throw new Error("Output file is not a gif or png file");
-    
-    for(let key in options) if(key !== 'quality' && key !== 'transparent') throw new Error(`Invalid option parameter: ${key}`);
+    if (!input) throw new Error("Input is required");
+    if (!output) throw new Error("Output is required");
+    if (!fs.existsSync(input)) throw new Error(`Input file does not exist (${input})`);
+    if (!fs.statSync(input).isFile()) throw new Error("Input is not a file");
+    if (path.extname(input) !== '.webp') throw new Error("Input file is not a webp file");
+    if (!['.gif', '.png'].includes(path.extname(output))) throw new Error("Output file must be a gif or png");
 
     const quality = options.quality || 10;
     const transparent = options.transparent || '0x000000';
 
-    if(output.endsWith('.png')) {
-      await execFile(this.#DWEBP, [input, '-o', output], (error) => {
-        if (error) return console.error(`Error executing anim_dump: ${error}`);
-      });
-
+    if (output.endsWith('.png')) {
+      await execFileAsync(this.#DWEBP, [input, '-o', output]);
       return output;
     }
 
@@ -49,37 +59,32 @@ class Converter {
     if (fs.existsSync(folder)) fs.rmSync(folder, { recursive: true });
     fs.mkdirSync(folder, { recursive: true });
 
-    await execFile(this.#ANIM_DUMP, ['-folder', folder, input], (error) => {
-      if (error) return console.error(`Error executing anim_dump: ${error}`);
-    });
+    try {
+      await execFileAsync(this.#ANIM_DUMP, ['-folder', folder, input]);
+      await waitForFrames(folder, Object.keys(rawFrames).length);
 
-    while (fs.readdirSync(folder).length !== Object.keys(rawFrames).length) {
-      await new Promise(resolve => setTimeout(resolve, 50));
-    }
+      const frames = fs.readdirSync(folder).filter(file => path.extname(file) === '.png');
+      for (let i = 0; i < frames.length; i++) {
+        const framePath = path.join(folder, frames[i]);
+        const ctx = createCanvas(width, height).getContext('2d');
+        const image = await loadImage(framePath);
+        ctx.drawImage(image, 0, 0, width, height);
 
-    const frames = fs.readdirSync(folder).filter(file => path.extname(file) === '.png');
+        const imageData = ctx.getImageData(0, 0, width, height);
+        const data = imageData.data;
 
-    for(let i = 0; i < frames.length; i++) {
-      const framePath = path.join(folder, frames[i]);
-      const ctx = createCanvas(width, height).getContext('2d');
-      const image = await loadImage(framePath);
-      ctx.drawImage(image, 0, 0, width, height);
+        for (let j = 0; j < data.length; j += 4) {
+          if (data[j + 3] > 0 && data[j + 3] < 128) data[j + 3] = 0;
+        }
 
-      const imageData = ctx.getImageData(0, 0, width, height);
-      const data = imageData.data;
-
-      for (let i = 0; i < data.length; i += 4) {
-        if (data[i + 3] > 0 && data[i + 3] < 128) data[i + 3] = 0;
+        ctx.putImageData(imageData, 0, 0);
+        encoder.setDelay(rawFrames[i].delay);
+        encoder.addFrame(ctx);
       }
-
-      // Put the modified pixel data back onto the canvas
-      ctx.putImageData(imageData, 0, 0);
-
-      encoder.setDelay(rawFrames[i].delay);
-      encoder.addFrame(ctx);
+    } finally {
+      fs.rmSync(folder, { recursive: true });
     }
 
-    fs.rmSync(folder, { recursive: true });
     encoder.finish();
     return output;
   }
