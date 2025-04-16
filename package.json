@@ -1,16 +1,30 @@
 {
   "name": "@caed0/webp-conv",
-  "version": "2.1.1",
-  "description": "A simple converter for animated WebP to GIF.",
+  "version": "2.1.2",
+  "description": "A powerful and simple Node.js library to convert animated WebP images to GIF format with high quality output and easy-to-use API.",
   "main": "index.js",
   "scripts": {
-    "postinstall": "node install.js"
+    "postinstall": "node install.js",
+    "test": "node test-install",
+    "conv": "node ./examples/convert.js"
   },
   "license": "MIT",
   "author": "caed0",
+  "keywords": [
+    "webp",
+    "gif",
+    "converter",
+    "image-conversion",
+    "animation",
+    "webp-to-gif",
+    "image-processing",
+    "animated-webp",
+    "nodejs",
+    "image-converter"
+  ],
   "dependencies": {
     "canvas": "^3.1.0",
     "gif-encoder-2": "^1.0.5",
-    "node-webpmux": "^3.2.0"
+    "node-webpmux": "^3.2.1"
   }
 }
