@@ -1,4 +1,6 @@
 const webpconv = require('../index.js');
+const fs = require('fs');
+const path = require('path');
 
 
 
@@ -102,6 +104,11 @@ async function example4() {
 
 // Run all examples
 async function runExamples() {
+    const outputDir = path.join(__dirname, 'images', 'output');
+    if (!fs.existsSync(outputDir)) {
+        fs.mkdirSync(outputDir, { recursive: true });
+    }
+    
     await example1();
     await example2();
     await example3();
