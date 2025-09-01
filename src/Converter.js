@@ -25,8 +25,98 @@ class Converter {
   #BINARIES = path.join(path.resolve(__dirname, '..'), 'libwebp', 'bin');
   #ANIM_DUMP = path.join(this.#BINARIES, 'anim_dump');
   #DWEBP = path.join(this.#BINARIES, 'dwebp');
+  #defaultOptions = {
+    quality: 10,
+    transparent: '0x000000'
+  };
 
-  async convert(input, output, options = {}) {
+  constructor(defaultOptions = {}) {
+    this.#defaultOptions = { ...this.#defaultOptions, ...defaultOptions };
+  }
+
+  /**
+   * Convert WebP files using job objects
+   * @param {Object|Array} jobs - Single job object or array of job objects
+   * @returns {Promise<string|Array>} - Output path(s) of converted file(s)
+   */
+  async convertJobs(jobs) {
+    if (!jobs) throw new Error("Jobs parameter is required");
+    
+    const isArray = Array.isArray(jobs);
+    const jobArray = isArray ? jobs : [jobs];
+    
+    // Validate all jobs first
+    for (const job of jobArray) {
+      this.#validateJob(job);
+    }
+    
+    const results = [];
+    for (const job of jobArray) {
+      const result = await this.#processJob(job);
+      results.push(result);
+    }
+    
+    return isArray ? results : results[0];
+  }
+
+  #validateJob(job) {
+    if (!job || typeof job !== 'object') {
+      throw new Error("Job must be an object");
+    }
+    if (!job.input) {
+      throw new Error("Job must have an 'input' property with the path to the input file");
+    }
+    if (!fs.existsSync(job.input)) {
+      throw new Error(`Input file does not exist (${job.input})`);
+    }
+    if (!fs.statSync(job.input).isFile()) {
+      throw new Error(`Input is not a file (${job.input})`);
+    }
+    if (path.extname(job.input) !== '.webp') {
+      throw new Error(`Input file is not a webp file (${job.input})`);
+    }
+  }
+
+  #generateOutputPath(inputPath) {
+    const dir = path.dirname(inputPath);
+    const basename = path.basename(inputPath, '.webp');
+    
+    // Check if it's an animated WebP to determine output format
+    try {
+      const buffer = fs.readFileSync(inputPath);
+      // Simple check for animation by looking for ANIM chunk
+      const isAnimated = buffer.includes(Buffer.from('ANIM'));
+      const ext = isAnimated ? '.gif' : '.png';
+      return path.join(dir, `${basename}${ext}`);
+    } catch (error) {
+      // Default to .png if we can't determine
+      return path.join(dir, `${basename}.png`);
+    }
+  }
+
+  async #processJob(job) {
+    const input = job.input;
+    const output = job.output || this.#generateOutputPath(input);
+    const jobOptions = { ...this.#defaultOptions, ...job.settings };
+    
+    return await this.convert(input, output, jobOptions, true); // true flag to suppress deprecation warning
+  }
+
+  /**
+   * Convert a single WebP file (DEPRECATED)
+   * @deprecated Use convertJobs() instead for better functionality and job-based processing
+   * @param {string} input - Path to input WebP file
+   * @param {string} output - Path to output file
+   * @param {Object} options - Conversion options
+   * @param {boolean} suppressWarning - Internal flag to suppress deprecation warning
+   * @returns {Promise<string>} - Path to converted file
+   */
+  async convert(input, output, options = {}, suppressWarning = false) {
+    // Show deprecation warning only when called directly by user
+    if (!suppressWarning) {
+      console.warn('⚠️  WARNING: The convert() method is deprecated. Please use convertJobs() instead for better functionality and job-based processing.');
+    }
+    
     if (!input) throw new Error("Input is required");
     if (!output) throw new Error("Output is required");
     if (!fs.existsSync(input)) throw new Error(`Input file does not exist (${input})`);
@@ -34,8 +124,9 @@ class Converter {
     if (path.extname(input) !== '.webp') throw new Error("Input file is not a webp file");
     if (!['.gif', '.png'].includes(path.extname(output))) throw new Error("Output file must be a gif or png");
 
-    const quality = options.quality || 10;
-    const transparent = options.transparent || '0x000000';
+    const mergedOptions = { ...this.#defaultOptions, ...options };
+    const quality = mergedOptions.quality;
+    const transparent = mergedOptions.transparent;
 
     if (output.endsWith('.png')) {
       await execFileAsync(this.#DWEBP, [input, '-o', output]);
@@ -56,8 +147,32 @@ class Converter {
     encoder.setQuality(quality);
 
     const folder = path.join(os.tmpdir(), 'webp-conv', path.basename(input));
-    if (fs.existsSync(folder)) fs.rmSync(folder, { recursive: true });
+    if (fs.existsSync(folder)) {
+      try {
+        fs.rmSync(folder, { recursive: true });
+      } catch (error) {
+        // Ignore cleanup errors for existing folder
+      }
+    }
     fs.mkdirSync(folder, { recursive: true });
+
+    let cleanupAttempts = 0;
+    const maxCleanupAttempts = 5;
+
+    const cleanupFolder = () => {
+      try {
+        if (fs.existsSync(folder)) {
+          fs.rmSync(folder, { recursive: true });
+        }
+      } catch (error) {
+        cleanupAttempts++;
+        if (cleanupAttempts < maxCleanupAttempts) {
+          // Wait a bit and try again
+          setTimeout(cleanupFolder, 100);
+        }
+        // If we can't clean up after several attempts, just continue
+      }
+    };
 
     try {
       await execFileAsync(this.#ANIM_DUMP, ['-folder', folder, input]);
@@ -81,11 +196,19 @@ class Converter {
         encoder.setDelay(rawFrames[i].delay);
         encoder.addFrame(ctx);
       }
-    } finally {
-      fs.rmSync(folder, { recursive: true });
-    }
 
-    encoder.finish();
+      encoder.finish();
+      
+      // Wait a moment for encoder to finish writing
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      // Clean up the temporary folder
+      cleanupFolder();
+    } catch (error) {
+      // Clean up on error
+      cleanupFolder();
+      throw error;
+    }
     return output;
   }
 }
