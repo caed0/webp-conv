@@ -1,7 +1,7 @@
 # webp-conv - WebP to GIF/PNG Converter 
-[![NPM Version](https://img.shields.io/npm/v/libwebp-static?style=for-the-badge)](https://www.npmjs.com/package/@caed0/webp-conv)
-[![NPM Downloads](https://img.shields.io/npm/d18m/libwebp-static?style=for-the-badge)](https://www.npmjs.com/package/@caed0/webp-conv)
-[![License](https://img.shields.io/npm/l/libwebp-static?style=for-the-badge)](LICENSE)
+[![NPM Version](https://img.shields.io/npm/v/%40caed0%2Fwebp-conv?style=for-the-badge)](https://www.npmjs.com/package/@caed0/webp-conv)
+[![NPM Downloads](https://img.shields.io/npm/d18m/%40caed0%2Fwebp-conv?style=for-the-badge)](https://www.npmjs.com/package/@caed0/webp-conv)
+[![License](https://img.shields.io/npm/l/%40caed0%2Fwebp-conv?style=for-the-badge)](LICENSE)
 
 webp-conv is a Node.js module for converting both animated and static WebP files to GIF or PNG format. This tool leverages the powerful libwebp library to provide high-quality conversions. With this tool, you can easily convert your WebP images using flexible job-based configuration, making it a convenient solution for your image conversion needs.
 
