@@ -2,12 +2,33 @@
   "name": "@caed0/webp-conv",
   "version": "2.2.1",
   "description": "A simple converter for animated WebP to GIF.",
+  "author": "caed0",
   "main": "index.js",
   "scripts": {
     "postinstall": "node install.js"
   },
+    "repository": {
+    "type": "git",
+    "url": "https://github.com/caed0/webp-conv"
+  },
+  "keywords": [
+    "nodejs",
+    "java-script",
+    "npm",
+    "converter",
+    "png",
+    "node",
+    "js",
+    "gif",
+    "webp",
+    "webp-converter",
+    "webp2gif",
+    "webp2png"
+  ],
+  "bugs": {
+    "url": "https://github.com/caed0/webp-conv/issues"
+  },
   "license": "GPL-3.0-or-later",
-  "author": "caed0",
   "dependencies": {
     "canvas": "^3.2.0",
     "gif-encoder-2": "^1.0.5",
