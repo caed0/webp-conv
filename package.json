@@ -9,8 +9,8 @@
   "license": "MIT",
   "author": "caed0",
   "dependencies": {
-    "canvas": "^3.1.0",
+    "canvas": "^3.2.0",
     "gif-encoder-2": "^1.0.5",
-    "node-webpmux": "^3.2.0"
+    "node-webpmux": "^3.2.1"
   }
 }
