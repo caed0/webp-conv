@@ -1,32 +1,18 @@
 /**
  * @file install.js
- * @description Script for downloading, extracting, and setting up the libwebp library.
- *
- * This file determines the correct libwebp archive to download based on the operating system
- * and CPU architecture. It downloads the archive, extracts its contents,
- * renames the extracted directory to "libwebp", and cleans up the downloaded archive.
- *
- * @constant {string} LIBWEBP_VERSION - The version of libwebp to download.
- * @constant {string} BASE_URL - The base URL for the libwebp releases.
- * @constant {string} EXTRACT_DIR - The target directory for extracted libwebp files.
- * @constant {string} PLATFORM - The operating system platform (e.g., 'linux', 'darwin', 'win32').
- * @constant {string} ARCH - The CPU architecture (e.g., 'x64', 'arm64').
- * @constant {(string|null)} fileName - The generated file name for the libwebp archive based on OS and architecture.
- * @constant {string} fileUrl - The complete URL to download the libwebp archive.
- * @constant {string} outputFile - The local filesystem path where the downloaded archive is saved.
- *
- * @function downloadFile
- * @description Downloads a file from a given URL and saves it to a specified destination.
- * @param {string} url - The URL of the file to be downloaded.
- * @param {string} dest - The local path where the file will be saved.
- * @param {Function} callback - The function to call once the download has completed.
- * @throws Will terminate the process if the download fails (non-200 HTTP status code) or if an error occurs.
- *
- * @see {@link https://nodejs.org/api/child_process.html} for execSync usage.
- * @see {@link https://nodejs.org/api/os.html} for OS detection.
- * @see {@link https://nodejs.org/api/path.html} for path management.
- * @see {@link https://nodejs.org/api/fs.html} for filesystem operations.
- * @see {@link https://nodejs.org/api/https.html} for HTTPS module usage.
+ * @description Post-install script for downloading and setting up libwebp binaries
+ * @author caed0
+ * @version 2.1.2
+ * 
+ * This script automatically downloads the appropriate libwebp binary package
+ * based on the current operating system and CPU architecture, extracts it,
+ * and sets up the directory structure required by the converter.
+ * 
+ * @requires child_process
+ * @requires os
+ * @requires path
+ * @requires fs
+ * @requires https
  */
 
 const { execSync } = require("child_process");
@@ -35,11 +21,29 @@ const path = require("path");
 const fs = require("fs");
 const https = require("https");
 
+/**
+ * @constant {string} LIBWEBP_VERSION - Version of libwebp to download
+ */
 const LIBWEBP_VERSION = "1.5.0";
+
+/**
+ * @constant {string} BASE_URL - Base URL for libwebp releases
+ */
 const BASE_URL = `https://storage.googleapis.com/downloads.webmproject.org/releases/webp/`;
+
+/**
+ * @constant {string} EXTRACT_DIR - Target directory for extracted files
+ */
 const EXTRACT_DIR = path.join(__dirname, "libwebp");
 
+/**
+ * @constant {string} PLATFORM - Current operating system platform
+ */
 const PLATFORM = os.platform();
+
+/**
+ * @constant {string} ARCH - Current CPU architecture
+ */
 const ARCH = os.arch();
 
 let fileName = null;
@@ -62,6 +66,13 @@ if (PLATFORM === "linux" && ARCH === "x64") {
 const fileUrl = BASE_URL + fileName;
 const outputFile = path.join(__dirname, fileName);
 
+/**
+ * Downloads a file from URL to local destination
+ * @param {string} url - URL of file to download
+ * @param {string} dest - Local destination path
+ * @param {Function} callback - Callback function to execute on completion
+ * @throws {Error} Terminates process on download failure or HTTP error
+ */
 function downloadFile(url, dest, callback) {
   console.log(`► Downloading: ${url}`);
   const file = fs.createWriteStream(dest);
