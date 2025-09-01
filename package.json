@@ -6,7 +6,7 @@
   "scripts": {
     "postinstall": "node install.js"
   },
-  "license": "MIT",
+  "license": "GPL-3.0-or-later",
   "author": "caed0",
   "dependencies": {
     "canvas": "^3.2.0",
