@@ -4,3 +4,8 @@ node_modules
 .gitignore
 .npmignore
 libwebp
+.github
+.vscode
+.DS_Store
+*.log
+*.tsbuildinfo
