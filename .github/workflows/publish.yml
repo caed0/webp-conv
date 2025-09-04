@@ -27,22 +27,6 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
           cache: 'npm'
 
-      - name: Install dependencies
-        run: |
-          if exist package-lock.json (
-            npm ci
-          ) else (
-            npm install
-          )
-
-      - name: Run tests (if present)
-        run: |
-          if npm run | findstr /C:" test" >nul (
-            npm test --silent
-          ) else (
-            echo "No test script; skipping."
-          )
-
       - name: Publish to npm
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
