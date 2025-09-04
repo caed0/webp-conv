@@ -29,6 +29,10 @@
     "url": "https://github.com/caed0/webp-conv/issues"
   },
   "license": "GPL-3.0-or-later",
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
   "dependencies": {
     "canvas": "^3.2.0",
     "gif-encoder-2": "^1.0.5",
