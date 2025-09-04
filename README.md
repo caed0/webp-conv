@@ -124,10 +124,26 @@ Both methods support the following settings (only apply to GIF output):
 
 ## Examples
 
-Check out the examples folder for more detailed usage examples:
+Simple, focused examples live in the `examples/` folder:
 
-- `examples/convert.js` - Shows both old and new methods
-- `examples/convert-jobs.js` - Comprehensive job-based examples
+- `examples/01-basic-single.js` — Convert one static WebP to PNG
+- `examples/02-auto-output.js` — Let the library choose output extension (.gif for animated, .png for static)
+- `examples/03-batch-jobs.js` — Batch conversion with per-job overrides
+- `examples/04-transparent-color.js` — Control GIF transparency color
+- `examples/99-deprecated-convert.js` — Legacy `convert()` usage (deprecated)
+
+Run them with npm scripts:
+
+```bash
+npm run example:basic
+npm run example:auto
+npm run example:batch
+npm run example:transparent
+npm run example:deprecated # optional
+
+# run all
+npm run examples:all
+```
 
 ## Migration Guide
 

@@ -5,7 +5,13 @@
   "author": "caed0",
   "main": "index.js",
   "scripts": {
-    "postinstall": "node install.js"
+  "postinstall": "node install.js",
+  "example:basic": "node examples/01-basic-single.js",
+  "example:auto": "node examples/02-auto-output.js",
+  "example:batch": "node examples/03-batch-jobs.js",
+  "example:transparent": "node examples/04-transparent-color.js",
+  "example:deprecated": "node examples/99-deprecated-convert.js",
+  "examples:all": "node examples/convert.js"
   },
   "repository": {
     "type": "git",
