@@ -9,3 +9,4 @@ libwebp
 .DS_Store
 *.log
 *.tsbuildinfo
+docs

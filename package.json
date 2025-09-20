@@ -11,7 +11,9 @@
     "example:batch": "node examples/03-batch-jobs.js",
     "example:transparent": "node examples/04-transparent-color.js",
     "example:deprecated": "node examples/99-deprecated-convert.js",
-    "examples:all": "node examples/convert.js"
+    "examples:all": "node examples/convert.js",
+    "docs": "jsdoc -c jsdoc.json",
+    "docs:clean": "node -e \"require('fs').rmSync('docs',{recursive:true,force:true})\""
   },
   "repository": {
     "type": "git",
@@ -43,5 +45,10 @@
     "canvas": "^3.2.0",
     "gif-encoder-2": "^1.0.5",
     "node-webpmux": "^3.2.1"
+  },
+  "devDependencies": {
+    "clean-jsdoc-theme": "^4.3.0",
+    "jsdoc": "^4.0.4",
+    "minami": "^1.2.3"
   }
 }

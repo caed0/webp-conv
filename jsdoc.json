@@ -1,0 +1,32 @@
+{
+  "plugins": ["plugins/markdown"],
+  "source": {
+    "include": ["src", "index.js", "README.md"],
+    "includePattern": ".+\\.js(doc|x)?$",
+    "excludePattern": "(^|\\\\|/)_(?!README)|(^|\\\\)(node_modules|examples|libwebp)(\\\\|/|$)"
+  },
+  "opts": {
+    "destination": "./docs",
+    "recurse": true,
+    "readme": "README.md",
+    "encoding": "utf8",
+    "template": "node_modules/clean-jsdoc-theme"
+  },
+  "templates": {
+    "cleverLinks": true,
+    "monospaceLinks": false,
+    "default": {
+      "includeDate": false
+    },
+    "clean-jsdoc-theme": {
+      "theme": "dark",
+      "search": true,
+      "navigation": {
+        "separator": "/"
+      }
+    }
+  },
+  "tags": {
+    "allowUnknownTags": true
+  }
+}

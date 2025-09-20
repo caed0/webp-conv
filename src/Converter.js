@@ -15,11 +15,13 @@ const os = require("os");
 
 /**
  * Promisified version of execFile for async/await usage
+ * @function
  * @private
+ * @async
  * @param {string} file - Path to executable file
- * @param {string[]} args - Array of arguments to pass to the executable
- * @returns {Promise<void>} Promise that resolves when execution completes
- * @throws {Error} When execution fails
+ * @param {string[]} args - Arguments to pass to the executable
+ * @returns {Promise<void>} Resolves when execution completes
+ * @throws {Error} When the child process exits with an error
  */
 const execFileAsync = (file, args) => {
   return new Promise((resolve, reject) => {
@@ -31,11 +33,13 @@ const execFileAsync = (file, args) => {
 };
 
 /**
- * Waits for the specified number of frames to be extracted to a folder
+ * Waits for the specified number of frames to be extracted to a folder.
+ * @function
  * @private
+ * @async
  * @param {string} folder - Path to folder containing extracted frames
  * @param {number} expectedCount - Expected number of frames
- * @returns {Promise<void>} Promise that resolves when all frames are available
+ * @returns {Promise<void>} Resolves when all frames are available
  */
 const waitForFrames = async (folder, expectedCount) => {
   while (fs.readdirSync(folder).length !== expectedCount) {
@@ -44,31 +48,53 @@ const waitForFrames = async (folder, expectedCount) => {
 };
 
 /**
- * WebP to GIF/PNG converter class
+ * Conversion options for GIF/PNG output.
+ * @typedef {Object} ConverterOptions
+ * @property {number} [quality=10] - GIF quality (1-100, lower = smaller file)
+ * @property {string} [transparent='0x000000'] - Transparent color as `0xRRGGBB`.
+ */
+
+/**
+ * A single conversion job describing input and desired output.
+ * @typedef {Object} Job
+ * @property {string} input - Path to input WebP file
+ * @property {string} [output] - Output path; auto-generated when omitted
+ * @property {ConverterOptions} [settings] - Per-job conversion settings
+ */
+
+/**
+ * WebP to GIF/PNG converter class.
  * @class
+ * @classdesc Provides high-level APIs to convert static and animated WebP images
+ * into PNG or GIF outputs. For multiple conversions, prefer {@link Converter#convertJobs}.
+ * @category Public API
  */
 class Converter {
   /**
-   * @private
-   * @type {string} Path to libwebp binaries directory
+  * Path to libwebp binaries directory
+  * @type {string}
+  * @private
    */
   #BINARIES = path.join(path.resolve(__dirname, '..'), 'libwebp', 'bin');
   
   /**
-   * @private
-   * @type {string} Path to anim_dump executable
+  * Path to anim_dump executable
+  * @type {string}
+  * @private
    */
   #ANIM_DUMP = path.join(this.#BINARIES, 'anim_dump');
   
   /**
-   * @private
-   * @type {string} Path to dwebp executable
+  * Path to dwebp executable
+  * @type {string}
+  * @private
    */
   #DWEBP = path.join(this.#BINARIES, 'dwebp');
   
   /**
-   * @private
-   * @type {Object} Default conversion options
+  * Default conversion options
+  * @type {Object}
+  * @private
    */
   #defaultOptions = {
     quality: 10,
@@ -76,35 +102,33 @@ class Converter {
   };
 
   /**
-   * Creates a new Converter instance
-   * @param {Object} [defaultOptions={}] - Default options for conversions
-   * @param {number} [defaultOptions.quality=10] - Default quality setting (1-100)
-   * @param {string} [defaultOptions.transparent='0x000000'] - Default transparent color in hex format
+   * Creates a new Converter instance.
+   * @param {ConverterOptions} [defaultOptions={}] - Default options for conversions
+   * @example
+   * const Converter = require('@caed0/webp-conv');
+   * const conv = new Converter({ quality: 80, transparent: '0x000000' });
    */
   constructor(defaultOptions = {}) {
     this.#defaultOptions = { ...this.#defaultOptions, ...defaultOptions };
   }
 
   /**
-   * Convert WebP files using job objects
-   * @param {Object|Object[]} jobs - Single job object or array of job objects
-   * @param {string} jobs.input - Path to input WebP file
-   * @param {string} [jobs.output] - Path to output file (auto-generated if not provided)
-   * @param {Object} [jobs.settings] - Job-specific conversion settings
-   * @param {number} [jobs.settings.quality] - Quality setting for this job (1-100)
-   * @param {string} [jobs.settings.transparent] - Transparent color for this job in hex format
+   * Convert WebP files using job objects.
+   * @category Public API
+   * @async
+   * @param {(Job|Job[])} jobs - A single job or an array of jobs
    * @returns {Promise<string|string[]>} Output path(s) of converted file(s)
-   * @throws {Error} When jobs parameter is missing or invalid
+   * @throws {Error} When jobs are missing/invalid or input is not a WebP
    * @example
    * // Single job
-   * const result = await converter.convertJobs({
+   * await converter.convertJobs({
    *   input: 'path/to/input.webp',
    *   output: 'path/to/output.gif',
    *   settings: { quality: 80 }
    * });
-   * 
+   *
    * // Multiple jobs
-   * const results = await converter.convertJobs([
+   * await converter.convertJobs([
    *   { input: 'file1.webp', settings: { quality: 90 } },
    *   { input: 'file2.webp', output: 'custom.png' }
    * ]);
@@ -154,10 +178,10 @@ class Converter {
   }
 
   /**
-   * Generates an appropriate output path based on input file and WebP type detection
+   * Generates an appropriate output path based on input file and WebP type detection.
    * @private
    * @param {string} inputPath - Path to input WebP file
-   * @returns {string} Generated output path (.gif for animated, .png for static)
+   * @returns {string} Output path (.gif for animated, .png for static)
    */
   #generateOutputPath(inputPath) {
     const dir = path.dirname(inputPath);
@@ -174,9 +198,10 @@ class Converter {
   }
 
   /**
-   * Processes a single job by merging options and calling the convert method
+   * Processes a single job by merging options and calling the convert method.
    * @private
-   * @param {Object} job - Job object to process
+   * @async
+   * @param {Job} job - Job object to process
    * @returns {Promise<string>} Path to converted file
    */
   async #processJob(job) {
@@ -188,22 +213,22 @@ class Converter {
   }
 
   /**
-   * Convert a single WebP file to GIF or PNG format
-   * @deprecated Use convertJobs() instead for better functionality and job-based processing
+   * Convert a single WebP file to GIF or PNG format.
+   * @category Public API
+   * @deprecated Use {@link Converter#convertJobs} for job-based processing.
+   * @async
    * @param {string} input - Path to input WebP file
    * @param {string} output - Path to output file (.gif or .png)
-   * @param {Object} [options={}] - Conversion options
-   * @param {number} [options.quality=10] - Quality setting for GIF conversion (1-100, lower = smaller file)
-   * @param {string} [options.transparent='0x000000'] - Transparent color in hex format
-   * @param {boolean} [suppressWarning=false] - Internal flag to suppress deprecation warning
+   * @param {ConverterOptions} [options={}] - Conversion options
+   * @param {boolean} [suppressWarning=false] - Internal flag to suppress the deprecation warning
    * @returns {Promise<string>} Path to converted file
-   * @throws {Error} When input/output validation fails or conversion errors occur
+   * @throws {Error} If validation fails or conversion errors occur
    * @example
    * // Convert animated WebP to GIF
-   * const result = await converter.convert('input.webp', 'output.gif', { quality: 80 });
-   * 
+   * await converter.convert('input.webp', 'output.gif', { quality: 80 });
+   *
    * // Convert static WebP to PNG
-   * const result = await converter.convert('static.webp', 'output.png');
+   * await converter.convert('static.webp', 'output.png');
    */
   async convert(input, output, options = {}, suppressWarning = false) {
     if (!suppressWarning) {
