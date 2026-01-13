@@ -42,7 +42,12 @@ const execFileAsync = (file, args) => {
  * @returns {Promise<void>} Resolves when all frames are available
  */
 const waitForFrames = async (folder, expectedCount) => {
-  while (fs.readdirSync(folder).length !== expectedCount) {
+  const fsPromises = fs.promises;
+  while (true) {
+    const files = await fsPromises.readdir(folder);
+    if (files.length === expectedCount) {
+      break;
+    }
     await new Promise(resolve => setTimeout(resolve, 50));
   }
 };
@@ -143,11 +148,10 @@ class Converter {
       this.#validateJob(job);
     }
     
-    const results = [];
-    for (const job of jobArray) {
-      const result = await this.#processJob(job);
-      results.push(result);
-    }
+    // Process jobs in parallel for better performance
+    const results = await Promise.all(
+      jobArray.map(job => this.#processJob(job))
+    );
     
     return isArray ? results : results[0];
   }
@@ -188,8 +192,14 @@ class Converter {
     const basename = path.basename(inputPath, '.webp');
     
     try {
-      const buffer = fs.readFileSync(inputPath);
-      const isAnimated = buffer.includes(Buffer.from('ANIM'));
+      // Read only the first 30 bytes to check for ANIM chunk (more efficient)
+      const fd = fs.openSync(inputPath, 'r');
+      const headerBuffer = Buffer.allocUnsafe(30);
+      fs.readSync(fd, headerBuffer, 0, 30, 0);
+      fs.closeSync(fd);
+      
+      // Check if it contains ANIM marker in the header
+      const isAnimated = headerBuffer.includes(Buffer.from('ANIM'));
       const ext = isAnimated ? '.gif' : '.png';
       return path.join(dir, `${basename}${ext}`);
     } catch (error) {
@@ -299,9 +309,13 @@ class Converter {
       await waitForFrames(folder, Object.keys(rawFrames).length);
 
       const frames = fs.readdirSync(folder).filter(file => path.extname(file) === '.png');
+      
+      // Pre-create canvas and context once instead of per frame
+      const canvas = createCanvas(width, height);
+      const ctx = canvas.getContext('2d');
+      
       for (let i = 0; i < frames.length; i++) {
         const framePath = path.join(folder, frames[i]);
-        const ctx = createCanvas(width, height).getContext('2d');
         const image = await loadImage(framePath);
         ctx.drawImage(image, 0, 0, width, height);
 
