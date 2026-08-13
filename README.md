@@ -5,6 +5,10 @@
 
 webp-conv is a Node.js module for converting both animated and static WebP files to GIF or PNG format. This tool leverages the powerful libwebp library to provide high-quality conversions. With this tool, you can easily convert your WebP images using flexible job-based configuration, making it a convenient solution for your image conversion needs.
 
+## Archived Repository
+
+> This repository has been archived and is no longer actively maintained. It remains available for reference, but new changes, bug fixes, and support should not be expected.
+
 ## 🚨 Important Notice
 
 > **DEPRECATION WARNING**: The `convert()` method is deprecated and will be removed in a future major version. Please migrate to the new `convertJobs()` method which offers better functionality, error handling, and job-based processing capabilities.
